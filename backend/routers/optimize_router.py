@@ -16,7 +16,9 @@ def optimize_prompt(prompt: PromptRequest):
     energy_calculator = TokenEnergyCalculator()
     original_prompt_energy = energy_calculator.analyze_prompt(prompt=prompt.text, model=prompt.model_name)
     prompt_optimizer = PromptOptimizer()
-    response = prompt_optimizer.analyze_prompt(prompt=prompt.text)
+
+    response = prompt_optimizer.analyze_prompt(prompt=prompt.text, output_format=prompt.output_format)
+
     balanced_prompt_energy = energy_calculator.analyze_prompt(prompt=response.balanced, model=prompt.model_name)
     aggresive_prompt_energy = energy_calculator.analyze_prompt(prompt=response.aggressive, model=prompt.model_name)
     conservative_prompt_energy = energy_calculator.analyze_prompt(prompt=response.conservative, model=prompt.model_name)
@@ -71,7 +73,7 @@ def optimize_prompt_ai(prompt: PromptRequest):
             detail="Phi-3 model is not loaded. Check /optimize/ai/status for details.",
         )
 
-    variants = llm.optimize(prompt.text)
+    variants = llm.optimize(prompt.text, output_format=prompt.output_format)
     energy_calculator = TokenEnergyCalculator()
 
     original_energy     = energy_calculator.analyze_prompt(prompt=prompt.text,               model=prompt.model_name)

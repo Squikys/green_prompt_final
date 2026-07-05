@@ -1,8 +1,11 @@
+from typing import Literal
+
 from pydantic import BaseModel
 
 
 class PromptRequest(BaseModel):
     text: str
+    output_format: Literal["compressed", "normal"] = "compressed"
     model_name: str
 
 

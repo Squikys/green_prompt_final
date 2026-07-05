@@ -520,10 +520,17 @@ class PromptOptimizer:
 
         return ' '.join(optimized_tokens)
 
-    def analyze_prompt(self, prompt: str):
-        """Comprehensive analysis of the prompt"""
+    def analyze_prompt(self, prompt: str, output_format: str = "compressed"):
+        """Comprehensive analysis of the prompt.
+
+        Args:
+            prompt: The raw user prompt.
+            output_format: If "compressed", append an instruction asking the
+                           chatbot to reply concisely.
+        """
         print(f"Original prompt: {prompt}")
         print(f"Length: {len(prompt)} characters, {len(prompt.split())} words")
+        print(f"Format: {output_format}")
         print("-" * 50)
 
         # Request clause analysis
@@ -554,10 +561,16 @@ class PromptOptimizer:
             print(f"  '{word}' ({pos})")
         print()
 
-        # Optimization results
+        # Full optimization: three distinct aggressiveness levels
         conservative = self.optimize_prompt_conservative(prompt) or prompt
         aggressive = self.optimize_prompt_aggressive(prompt) or prompt
         balanced = self.optimize_prompt_balanced(prompt) or prompt
+
+        if output_format == "compressed":
+            suffix = " Reply concisely."
+            conservative += suffix
+            aggressive += suffix
+            balanced += suffix
 
         print("Optimization Results:")
         print(f"Conservative: {conservative}")

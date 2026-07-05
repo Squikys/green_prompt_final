@@ -42,6 +42,8 @@ class LLMOptimizer:
 
     # System instruction with a concrete few-shot example.
     # Small models (0.5B) need to SEE the task rather than read rules about it.
+    # System instruction with a concrete few-shot example.
+    # Small models (0.5B) need to SEE the task rather than read rules about it.
     SYSTEM_PROMPT = (
         "You are a prompt rewriter. Shorten AI prompts while preserving ALL specific details.\n"
         "CRITICAL: Keep all specific nouns, algorithms, variable names, and technical terms exactly.\n"
@@ -155,20 +157,29 @@ class LLMOptimizer:
     # Public API
     # ------------------------------------------------------------------
 
-    def optimize(self, prompt: str) -> dict:
+    def optimize(self, prompt: str, output_format: str = "compressed") -> dict:
         """
         Returns a dict with keys: conservative, balanced, aggressive.
         Each value is a rewritten version of `prompt`.
-        Falls back to the original string if the model is unavailable.
+
+        If output_format is "compressed", appends an instruction to the LLM to reply concisely.
         """
         if not self.loaded:
             logger.warning("LLM not loaded — returning original prompt for all variants.")
-            return {"conservative": prompt, "balanced": prompt, "aggressive": prompt}
+            variants = {"conservative": prompt, "balanced": prompt, "aggressive": prompt}
+        else:
+            try:
+                raw = self._generate(prompt)
+                logger.info(f"Qwen raw output: {raw!r}")
+                variants = self._parse_variants(raw, prompt)
+            except Exception:
+                logger.exception("Qwen inference error")
+                variants = {"conservative": prompt, "balanced": prompt, "aggressive": prompt}
 
-        try:
-            raw = self._generate(prompt)
-            logger.info(f"Qwen raw output: {raw!r}")
-            return self._parse_variants(raw, prompt)
-        except Exception:
-            logger.exception("Qwen inference error")  # prints full traceback to server log
-            return {"conservative": prompt, "balanced": prompt, "aggressive": prompt}
+        if output_format == "compressed":
+            suffix = " Reply concisely."
+            variants["conservative"] += suffix
+            variants["balanced"] += suffix
+            variants["aggressive"] += suffix
+            
+        return variants
