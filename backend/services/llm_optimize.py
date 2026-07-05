@@ -1,4 +1,12 @@
+"""
+LLM-based prompt optimizer using Qwen2.5-0.5B-Instruct.
 
+Why Qwen2.5-0.5B?
+  - ~500 MB download  (vs Phi-3-mini's 7.6 GB)
+  - ~1 GB RAM at runtime in bfloat16
+  - Fully instruction-tuned: follows JSON output instructions reliably
+  - Fast on CPU (< 5 s per request)
+"""
 
 import json
 import re
@@ -23,7 +31,7 @@ def get_llm_optimizer() -> "LLMOptimizer":
 
 class LLMOptimizer:
     """
-    Wraps Qwen/Qwen2.5-1.5B-Instruct to produce three optimized
+    Wraps Qwen/Qwen2.5-0.5B-Instruct to produce three optimized
     variants (conservative / balanced / aggressive) of a given prompt.
 
     The model is loaded once when the class is instantiated and kept in
